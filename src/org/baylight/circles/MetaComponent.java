@@ -192,8 +192,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     int indexIncrement = getIndexIncrement();
     for (int i = 0; i < 4; i += indexIncrement) {
       drawing.setColor(colors[i]);
-      drawing.drawMain(centerPt, rotation);
-      rotation += angleIncrement*indexIncrement;
+      drawing.drawMain(centerPt, rotation + i*angleIncrement);
     }
   }
 
@@ -208,16 +207,17 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
   }
 
   /**
-   * Inner class to hold the basic information for drawing the circles.
-   * Graphics context.
-   * Diameter of the circles.
-   * Angle between each circle (30 degrees).
+   * Inner class for drawing the circles into a given graphics context:
+   *   Graphics context.
+   *   Diameter of the circles.
+   *   Whether to show the circles or just the connecting lines.
   **/
   protected class DrawingContext {
     private static final double deg60 = PI / 3.0;
     private final Graphics2D g2d;
     private final double diameter;
     private final boolean showCircles;
+
     DrawingContext(Graphics2D g2d, double diameter, boolean showCircles) {
       this.g2d = g2d;
       this.diameter = diameter;
@@ -228,6 +228,12 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
       g2d.setColor(color);
     }
 
+    /**
+     * Draw all circles and connecting lines of the metatron with an initial rotation
+     * offset.
+     * 
+     * Note: if showCircles is false, then only the connecting lines are drawn.
+     **/
     public void drawMain(Point2D centerPt, double rotation) {
       drawCircle(centerPt);
       double dist = diameter;
@@ -242,11 +248,21 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
       connectInnerOuter(5, innerPts, outerPts);
     }
 
+    /**
+     * Draw 2 lines connecting the given outer point to the 2 inner points across
+     * from it that are not already connected by other outer point connecting lines.
+     **/
     protected void connectInnerOuter(int index, Point2D[] innerPts, Point2D[] outerPts) {
       drawLine(outerPts[index], innerPts[(index + 2)%6]);
       drawLine(outerPts[index], innerPts[(index + 4)%6]);
     }
 
+    /**
+     * Draw 6 circles around the center point with the given distance and an initial
+     * rotation offset. Also connect all of the circle center points by lines.
+     * 
+     * Note: if showCircles is false, then only the connecting lines are drawn.
+     **/
     protected Point2D[] draw6(Point2D center, double dist, double rotation) {
 
       Point2D[] circles = new Point2D[6];
