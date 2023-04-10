@@ -10,14 +10,14 @@ import static java.lang.Math.*;
 
 
 class MetaComponent extends JPanel implements ItemListener, ActionListener, Printable {
-  int sizex = 1000, sizey = 1000;
-  JPanel controlPanel;
-  JCheckBox colorCheckbox;
-  JCheckBox circlesCheckbox;
-  JButton printButton;
-  char colorSelection = 'B';
-  boolean showCircles = Boolean.TRUE;
-  int imageCount = 1;
+  private static final Dimension preferredSize = new Dimension(1000, 1000);
+  private final JPanel controlPanel;
+  private final JCheckBox colorCheckbox;
+  private final JCheckBox circlesCheckbox;
+  private final JButton printButton;
+  private char colorSelection = 'B';
+  private boolean showCircles = Boolean.TRUE;
+  private int imageCount = 1;
 
   public MetaComponent() {
     super(new FlowLayout());
@@ -49,12 +49,10 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     setControlPanelColors();
 
     add(controlPanel);
-    //add(pictureLabel, BorderLayout.CENTER);
-    setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
   }
 
   public Dimension getPreferredSize() {
-      return new Dimension(sizex,sizey);
+    return preferredSize;
   }
 
   /** Listens to the check boxes. */
@@ -167,13 +165,15 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
   public void paintComponent(Graphics g) {
     super.paintComponent(g);       
 
-    Graphics2D g2 = (Graphics2D) g;
+    Graphics2D g2d = (Graphics2D) g;
     setBackground(colorSelection == 'B' ? Color.BLACK : Color.WHITE);
 
-    // draw Ellipse2D.Double
-    double diam = 160;
+    // offset y for control panel and adjust height of drawing area
     Dimension size = getSize();
-    Point2D centerPt = new Point2D.Double(size.getWidth()/2, size.getHeight()/2);
+    double yOffset = controlPanel.getHeight();
+    double width = size.getWidth();
+    double height = size.getHeight() - yOffset;
+    Point2D centerPt = new Point2D.Double(width/2, yOffset + height/2);
 
     Color[] blackColors = new Color[] {
       Color.BLUE, Color.RED, Color.YELLOW, Color.GREEN
@@ -183,7 +183,10 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     };
     Color[] colors = colorSelection == 'B' ? blackColors : whiteColors;
 
-    DrawingContext drawing = new DrawingContext(g2, diam, showCircles);
+    // Image is appoximately 5 times the diameter, so choose
+    // diameter to be min(pageWidth, pageHight)/5.2
+    double diameter = min(width, height)/5.2;
+    DrawingContext drawing = new DrawingContext(g2d, diameter, showCircles);
     double rotation = PI / 6.0;
     double angleIncrement = toRadians(15);
     int indexIncrement = getIndexIncrement();
@@ -211,23 +214,23 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
    * Angle between each circle (30 degrees).
   **/
   protected class DrawingContext {
-    final Graphics2D g2;
-    final double diam;
-    final boolean showCircles;
-    final double deg30 = PI / 3.0;
-    DrawingContext(Graphics2D g, double diameter, boolean showCircles) {
-      g2 = g;
-      diam = diameter;
+    private static final double deg60 = PI / 3.0;
+    private final Graphics2D g2d;
+    private final double diameter;
+    private final boolean showCircles;
+    DrawingContext(Graphics2D g2d, double diameter, boolean showCircles) {
+      this.g2d = g2d;
+      this.diameter = diameter;
       this.showCircles = showCircles;
     }
 
     public void setColor(Color color) {
-      g2.setColor(color);
+      g2d.setColor(color);
     }
 
     public void drawMain(Point2D centerPt, double rotation) {
       drawCircle(centerPt);
-      double dist = diam;
+      double dist = diameter;
       Point2D[] innerPts = draw6(centerPt, dist, rotation);
       Point2D[] outerPts = draw6(centerPt, dist*2, rotation);
 
@@ -245,24 +248,18 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     }
 
     protected Point2D[] draw6(Point2D center, double dist, double rotation) {
-      double angle = rotation;
-      Point2D pt1 = arcPoint(center, dist, angle);
-      drawCircle(pt1);
-      angle += deg30;
-      Point2D pt2 = arcPoint(center, dist, angle);
-      drawCircle(pt2);
-      angle += deg30;
-      Point2D pt3 = arcPoint(center, dist, angle);
-      drawCircle(pt3);
-      angle += deg30;
-      Point2D pt4 = arcPoint(center, dist, rotation + PI);
-      drawCircle(pt4);
-      angle += deg30;
-      Point2D pt5 = arcPoint(center, dist, angle);
-      drawCircle(pt5);
-      angle += deg30;
-      Point2D pt6 = arcPoint(center, dist, angle);
-      drawCircle(pt6);
+
+      Point2D[] circles = new Point2D[6];
+      for (int i = 0; i < 6; i++) {
+        circles[i] = arcPoint(center, dist, rotation + i*deg60);
+        drawCircle(circles[i]);
+      }
+      Point2D pt1 = circles[0];
+      Point2D pt2 = circles[1];
+      Point2D pt3 = circles[2];
+      Point2D pt4 = circles[3];
+      Point2D pt5 = circles[4];
+      Point2D pt6 = circles[5];
 
       drawLine(pt1, pt2);
       drawLine(pt1, pt3);
@@ -284,25 +281,23 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
 
       drawLine(pt5, pt6);
 
-      return new Point2D[] {
-        pt1, pt2, pt3, pt4, pt5, pt6
-      };
+      return circles;
     }
 
     protected void drawCircle(Point2D center) {
       if (showCircles) {
         Ellipse2D centerCircle = new Ellipse2D.Double();
         centerCircle.setFrameFromCenter(center, corner(center));
-        g2.draw(centerCircle);
+        g2d.draw(centerCircle);
       }
     }
 
     protected Point2D corner(Point2D center) {
-      return new Point2D.Double(center.getX() - diam/2, center.getY() - diam/2);
+      return new Point2D.Double(center.getX() - diameter/2, center.getY() - diameter/2);
     }
 
     protected void drawLine(Point2D pt1, Point2D pt2) {
-      g2.draw(new Line2D.Double(pt1, pt2));
+      g2d.draw(new Line2D.Double(pt1, pt2));
     }
 
     protected Point2D arcPoint(Point2D center, double dist, double angle) {
