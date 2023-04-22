@@ -51,11 +51,13 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     add(controlPanel);
   }
 
+  @Override
   public Dimension getPreferredSize() {
     return preferredSize;
   }
 
   /** Listens to the check boxes. */
+  @Override
   public void itemStateChanged(ItemEvent e) {
     int index = 0;
     char c = '-';
@@ -72,6 +74,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
   }
 
   /** Listens to the drop down combo or print button */
+  @Override
   public void actionPerformed(ActionEvent e) {
     Object source = e.getSource();
     if (source == printButton) {
@@ -113,6 +116,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     }
   }
 
+  @Override
   public int print(Graphics g, PageFormat pf, int page)
         throws PrinterException {
 
@@ -162,6 +166,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     return PAGE_EXISTS;
   }
   
+  @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);       
 
@@ -197,13 +202,11 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
   }
 
   protected int getIndexIncrement() {
-    if (imageCount == 1) {
-      return 4;
-    } else if (imageCount == 2) {
-      return 2;
-    } else {
-      return 1;
-    }
+      return switch (imageCount) {
+          case 1 -> 4;
+          case 2 -> 2;
+          default -> 1;
+      };
   }
 
   /**
