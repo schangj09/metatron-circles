@@ -1,23 +1,88 @@
 package org.baylight.spheres;
 
+import com.sun.j3d.utils.geometry.ColorCube;
+import com.sun.j3d.utils.universe.SimpleUniverse;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.print.*;
 import static java.lang.Math.*;
-import javax.swing.*;
+import javax.media.j3d.Alpha;
+import javax.media.j3d.BoundingSphere;
+import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Canvas3D;
+import javax.media.j3d.RotationInterpolator;
+import javax.media.j3d.Transform3D;
+import javax.media.j3d.TransformGroup;
+import javax.swing.JPanel;
+import javax.vecmath.Point3d;
 
 class Draw3dComponent extends JPanel implements Printable, PrintHandler {
 
   private static final Dimension preferredSize = new Dimension(1000, 1000);
   private final ControlPanelComponent controlPanel;
+  private SimpleUniverse u = null;
 
   public Draw3dComponent(final ControlPanelComponent controlPanel) {
     this.controlPanel = controlPanel;
+    init();
   }
 
   @Override
   public Dimension getPreferredSize() {
     return preferredSize;
+  }
+
+  public void init() {
+    GraphicsConfiguration config = SimpleUniverse
+        .getPreferredConfiguration();
+
+    Canvas3D c = new Canvas3D(config);
+    add("Center", c);
+
+    // Create a simple scene and attach it to the virtual universe
+    BranchGroup scene = createSceneGraph();
+    u = new SimpleUniverse(c);
+
+    // This will move the ViewPlatform back a bit so the
+    // objects in the scene can be viewed.
+    u.getViewingPlatform().setNominalViewingTransform();
+
+    u.addBranchGraph(scene);
+
+  }
+
+  public BranchGroup createSceneGraph() {
+    // Create the root of the branch graph
+    BranchGroup objRoot = new BranchGroup();
+
+    // Create the TransformGroup node and initialize it to the
+    // identity. Enable the TRANSFORM_WRITE capability so that
+    // our behavior code can modify it at run time. Add it to
+    // the root of the subgraph.
+    TransformGroup objTrans = new TransformGroup();
+    objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+    objRoot.addChild(objTrans);
+
+    // Create a simple Shape3D node; add it to the scene graph.
+    objTrans.addChild(new ColorCube(0.4));
+
+    // Create a new Behavior object that will perform the
+    // desired operation on the specified transform and add
+    // it into the scene graph.
+    Transform3D yAxis = new Transform3D();
+    Alpha rotationAlpha = new Alpha(-1, 4000);
+
+    RotationInterpolator rotator = new RotationInterpolator(rotationAlpha,
+        objTrans, yAxis, 0.0f, (float) Math.PI * 2.0f);
+    BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0),
+        100.0);
+    rotator.setSchedulingBounds(bounds);
+    objRoot.addChild(rotator);
+
+    // Have Java 3D perform optimizations on this scene graph.
+    objRoot.compile();
+
+    return objRoot;
   }
 
   @Override
@@ -39,54 +104,14 @@ class Draw3dComponent extends JPanel implements Printable, PrintHandler {
   public int print(Graphics g, PageFormat pf, int page)
       throws PrinterException {
 
-    // We have only one page, and 'page'
-    // is zero-based
+    // We have only one page, and 'page'is zero-based
     if (page > 0) {
       return NO_SUCH_PAGE;
     }
-
-    // User (0,0) is typically outside the
-    // imageable area, so we must translate
-    // by the X and Y values in the PageFormat
-    // to avoid clipping.
-    Graphics2D g2d = (Graphics2D) g;
-    g2d.translate(pf.getImageableX(), pf.getImageableY());
-
-    // Stroke dashedStroke = new BasicStroke(
-    //   0.1f,
-    //   BasicStroke.CAP_ROUND,
-    //   BasicStroke.JOIN_MITER,
-    //   1.0f,
-    //   new float[] {2.0f, 4.0f},
-    //   0.0f
-    // );
-    Stroke thinStroke = new BasicStroke(
-        0.4f
-    );
-    g2d.setStroke(thinStroke);
-
-    // Image is appoximately 5 times the diameter, so choose
-    // diameter to be min(pageWidth, pageHight)/5
-    double pageWidth = pf.getImageableWidth();
-    double pageHeight = pf.getImageableHeight();
-    double diameter = min(pageWidth, pageHeight) / 5;
-    DrawingContext drawing = new DrawingContext(g2d, diameter, controlPanel.showCircles);
-    Point2D centerPt = new Point2D.Double(pageWidth / 2, pageHeight / 2);
-    double rotation = PI / 6.0;
-    double angleIncrement = toRadians(15);
-    int indexIncrement = getIndexIncrement();
-    for (int i = 0; i < 4; i += indexIncrement) {
-      drawing.drawMain(centerPt, rotation);
-      rotation += angleIncrement * indexIncrement;
-    }
-
-    // tell the caller that this page is part
-    // of the printed document
-    return PAGE_EXISTS;
+    return NO_SUCH_PAGE;
   }
 
-  @Override
-  public void paintComponent(Graphics g) {
+  public void paint2Component(Graphics g) {
     super.paintComponent(g);
 
     Graphics2D g2d = (Graphics2D) g;

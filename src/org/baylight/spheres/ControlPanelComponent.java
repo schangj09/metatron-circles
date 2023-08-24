@@ -31,7 +31,7 @@ class ControlPanelComponent extends JPanel implements ItemListener, ActionListen
     circlesCheckbox.addItemListener(this);
 
     JLabel countLabel = new JLabel("Number of images", JLabel.LEADING);
-    JComboBox<String> countList = new JComboBox<String>(new String[]{"1", "2", "4"});
+    JComboBox<String> countList = new JComboBox<>(new String[]{"1", "2", "4"});
     countList.addActionListener(this);
 
     printButton = new JButton("Print");
@@ -44,7 +44,6 @@ class ControlPanelComponent extends JPanel implements ItemListener, ActionListen
     controlPanel.add(colorCheckbox);
     controlPanel.add(circlesCheckbox);
     controlPanel.add(printButton);
-    //setControlPanelColors();
 
     add(controlPanel);
   }
@@ -59,7 +58,6 @@ class ControlPanelComponent extends JPanel implements ItemListener, ActionListen
     if (source == colorCheckbox) {
       colorSelection = (e.getStateChange() == ItemEvent.DESELECTED)
           ? 'W' : 'B';
-      //setControlPanelColors();
     } else if (source == circlesCheckbox) {
       showCircles = (e.getStateChange() == ItemEvent.SELECTED);
     }
@@ -85,16 +83,4 @@ class ControlPanelComponent extends JPanel implements ItemListener, ActionListen
       getParent().repaint();
     }
   }
-
-  protected void setControlPanelColors() {
-    Color backgroundColor = (colorSelection == 'B') ? Color.BLACK : Color.WHITE;
-    Color foregroundColor = (colorSelection == 'B') ? Color.WHITE : Color.BLACK;
-    controlPanel.setBackground(backgroundColor);
-    controlPanel.setForeground(foregroundColor);
-    for (int i = 0; i < controlPanel.getComponentCount(); i++) {
-      controlPanel.getComponent(i).setBackground(backgroundColor);
-      controlPanel.getComponent(i).setForeground(foregroundColor);
-    }
-  }
-
 }
