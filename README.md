@@ -3,7 +3,7 @@ Metatron’s Cube is a form of sacred geometry related to the Flower of Life.
 
 The idea of this program came from an interview I watched of Robert Edward Grant. During the interview he talked about his view of the meaning of Metatron’s Cube. Within the lines of the Metatron’s Cube one can find many regular polygons. In addition, he states, if you superimpose 4 views, which are rotated by 45 degrees each, then the resulting lines contains the projections of an extraordinary number of 3 dimensional regular solids. He states that finding the forms within the lines can be a rewarding process.
 
-See: <a href="https://www.youtube.com/watch?v=Ayc3BXG-p9w target="metatronvideo"">Decrypting Universal Mysteries & Esoteric Wisdom</a>
+See: <a href="https://www.youtube.com/watch?v=Ayc3BXG-p9w" target="_metatronvideo">Decrypting Universal Mysteries & Esoteric Wisdom</a>
 <blockquote>Note: from <a href="https://www.youtube.com/watch?v=Ayc3BXG-p9w&t=397s" target="_metatronvideo">6:37 to 9:57</a>, he describes the meaning and use of Metatron’s cube in detail</blockquote>
 See also: <a href="https://robertedwardgrant.com/courses/philosophical-geometry-day-07-metatrons-cube-hypergeometries/" target="_metatronvideo">Metatron’s Cube Hypergeometries</a>
 <blockquote>Note: at <a href="https://www.youtube.com/watch?v=4ykU-JxyGWQ&t=1596s target="_metatronvideo"">26:36</a> he has completed the drawing of a subset of the lines of 4 rotated views of Metatron’s cube, which you can compare to the output of the program.</blockquote>

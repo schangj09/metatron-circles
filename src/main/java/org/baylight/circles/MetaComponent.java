@@ -124,14 +124,17 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
   }
 
   /**
-   * Helper method to invoke the print dialog. When the user presses Print in
-   * the dialog then the framework will call the print method.
+   * Helper method to invoke the print dialog which initializes the PrinterJob.
+   * we call print() method on the PrinterJob, which then calls the
+   * Printable.print method of this class to draw a page onto the printer
+   * drawing context.
    */
   protected void onPrint() {
     PrinterJob job = PrinterJob.getPrinterJob();
     job.setPrintable(this);
     boolean doPrint = job.printDialog();
     if (doPrint) {
+      // the user requested to print, so invoke the print job
       try {
         job.print();
       } catch (PrinterException e) {
@@ -142,7 +145,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
   }
 
   /**
-   * Override the default print method to implement printing functionality. We
+   * Implement the Printable.print method to provide printing functionality. We
    * print only one page with the diagram occupying as much of the page as
    * possible.
    *
@@ -188,7 +191,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     double pageWidth = pf.getImageableWidth();
     double pageHeight = pf.getImageableHeight();
     double diameter = min(pageWidth, pageHeight) / 5;
-    DrawingContext drawing = new DrawingContext(g2d, diameter, showCircles);
+    MetaDrawingHelper drawing = new MetaDrawingHelper(g2d, diameter, showCircles);
     Point2D centerPt = new Point2D.Double(pageWidth / 2, pageHeight / 2);
     double rotation = PI / 6.0;
     double angleIncrement = toRadians(15);
@@ -234,7 +237,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
     // Image is appoximately 5 times the diameter, so choose
     // diameter to be min(pageWidth, pageHight)/5.2
     double diameter = min(width, height) / 5.2;
-    DrawingContext drawing = new DrawingContext(g2d, diameter, showCircles);
+    MetaDrawingHelper drawing = new MetaDrawingHelper(g2d, diameter, showCircles);
     double rotation = PI / 6.0;
     double angleIncrement = toRadians(15);
     int indexIncrement = getIndexIncrement();
@@ -265,7 +268,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
    * Inner class for drawing a metatron cube into a given {@link Graphics2D}.
    * The diameter is fixed but the rotation is specified for each call.
    */
-  protected class DrawingContext {
+  protected class MetaDrawingHelper {
 
     private static final double deg60 = PI / 3.0;
     private final Graphics2D g2d;
@@ -279,7 +282,7 @@ class MetaComponent extends JPanel implements ItemListener, ActionListener, Prin
      * @param diameter the diameter of the circles in the metatron cube
      * @param showCircles whether to show the circles in addition to lines
      */
-    DrawingContext(Graphics2D g2d, double diameter, boolean showCircles) {
+    MetaDrawingHelper(Graphics2D g2d, double diameter, boolean showCircles) {
       this.g2d = g2d;
       this.diameter = diameter;
       this.showCircles = showCircles;
